@@ -164,9 +164,9 @@
                   :class="activeData[item.id] ? 'line-through text-slate-400' : 'text-white'"
                 >{{ item.name }}</span>
                 <div v-if="item.unit" class="flex items-center gap-1">
-                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
-                  <span class="text-sm text-amber-300 w-7 text-center">{{ getQty(activeData, item.id) }}</span>
-                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
+                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) - 1)" class="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 text-white font-bold leading-none grid place-content-center flex-shrink-0">&minus;</button>
+                  <span class="text-sm text-amber-300 w-7 text-center tabular-nums">{{ getQty(activeData, item.id) }}</span>
+                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) + 1)" class="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 text-white font-bold leading-none grid place-content-center flex-shrink-0">+</button>
                   <span class="text-xs text-slate-500 ml-1">{{ item.unit }}</span>
                 </div>
               </li>
@@ -222,12 +222,12 @@
                 >{{ z.title }}</span>
                 <!-- counter for ×100 zikir -->
                 <div v-if="z.target" class="flex items-center gap-1 flex-shrink-0" @click.stop>
-                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
+                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) - 1)" class="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 text-white font-bold leading-none grid place-content-center flex-shrink-0">&minus;</button>
                   <span
-                    class="text-xs font-mono w-8 text-center font-bold"
+                    class="text-xs font-mono w-8 text-center font-bold tabular-nums"
                     :class="getQty(activeData, z.id) >= z.target ? 'text-amber-400' : 'text-slate-300'"
                   >{{ getQty(activeData, z.id) }}</span>
-                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
+                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) + 1)" class="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 text-white font-bold leading-none grid place-content-center flex-shrink-0">+</button>
                   <span class="text-xs text-slate-500">/{{ z.target }}</span>
                 </div>
                 <button @click="toggleZikir(z.id)" class="flex-shrink-0 text-slate-400 hover:text-amber-400 px-1 transition">

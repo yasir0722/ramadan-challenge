@@ -1,6 +1,7 @@
 id,name,type,unit
 sahur,Sahur,general,
 subuh,Solat Subuh,general,
+subuh_masjid,Solat Subuh Jemaah Masjid,general,
 quran,Tilawah Al-Quran,general,pages
 dhuha,Solat Dhuha,general,
 sedekah,Sedekah,general,
