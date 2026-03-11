@@ -42,8 +42,8 @@ function parseCSV(text) {
     .filter((item) => item.id && item.name);
 }
 
-// Ramadan 1447 AH starts 2 March 2026 (Malaysia official)
-const RAMADAN_1447_START = new Date(2026, 2, 2);
+// Ramadan 1447 AH starts 19 February 2026 (Malaysia official)
+const RAMADAN_1447_START = new Date(2026, 1, 19);
 
 function getHijriDate(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
@@ -294,8 +294,8 @@ createApp({
 
     const isViewingToday = computed(() => activeDate.value === todayKey.value);
     const isAtFirstDay = computed(() => {
-      // Don't allow going before 1 Ramadan 1447 = 2 Mar 2026 (Malaysia)
-      return activeDate.value <= '2026-03-02';
+      // Don't allow going before 1 Ramadan 1447 = 19 Feb 2026 (Malaysia)
+      return activeDate.value <= '2026-02-19';
     });
 
     const hijriDate = computed(() => getHijriDate(activeDate.value));
