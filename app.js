@@ -42,8 +42,8 @@ function parseCSV(text) {
     .filter((item) => item.id && item.name);
 }
 
-// Ramadan 1447 AH starts 1 March 2026 (Malaysia official)
-const RAMADAN_1447_START = new Date(2026, 2, 1);
+// Ramadan 1447 AH starts 2 March 2026 (Malaysia official)
+const RAMADAN_1447_START = new Date(2026, 2, 2);
 
 function getHijriDate(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
@@ -83,24 +83,28 @@ const ZIKIR_LIST = [
     title: 'Subhanallah × 100',
     arabic: 'سُبْحَانَ اللهِ',
     meaning: 'Maha Suci Allah. Dibaca 100 kali.',
+    target: 100,
   },
   {
     id: 'alhamdulillah',
     title: 'Alhamdulillah × 100',
     arabic: 'الْحَمْدُ لِلهِ',
     meaning: 'Segala puji bagi Allah. Dibaca 100 kali.',
+    target: 100,
   },
   {
     id: 'allahuakbar',
     title: 'Allahu Akbar × 100',
     arabic: 'اللهُ أَكْبَرُ',
     meaning: 'Allah Maha Besar. Dibaca 100 kali.',
+    target: 100,
   },
   {
     id: 'astaghfirullah',
     title: 'Astaghfirullah × 100',
     arabic: 'أَسْتَغْفِرُ اللهَ',
     meaning: 'Aku memohon ampun kepada Allah. Dibaca 100 kali.',
+    target: 100,
   },
   {
     id: 'tasbih_azim',
@@ -113,6 +117,7 @@ const ZIKIR_LIST = [
     title: 'Selawat × 100',
     arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',
     meaning: 'Ya Allah, cucurkanlah rahmat ke atas Nabi Muhammad. Dibaca 100 kali.',
+    target: 100,
   },
   {
     id: 'rabbana_atina',
@@ -230,7 +235,13 @@ createApp({
     function setActiveQty(id, val) {
       const qty = Math.max(0, parseInt(val) || 0);
       const updated = { ...activeData.value, [id + '_qty']: qty };
-      if (qty > 0) updated[id] = true;
+      const zikirEntry = ZIKIR_LIST.find(z => z.id === id);
+      if (zikirEntry && zikirEntry.target) {
+        // auto-check when count reaches target
+        updated[id] = qty >= zikirEntry.target;
+      } else if (qty > 0) {
+        updated[id] = true;
+      }
       activeData.value = updated;
       setDateData(activeDate.value, updated);
       refreshStreak();
@@ -252,11 +263,28 @@ createApp({
 
     /* ── Computed ────────────────────────────────────────────────── */
 
-    const totalItems = computed(() => items.value.length);
+    // Terawih 8 & 20 are mutually exclusive — count as one slot
+    const totalItems = computed(() => {
+      const hasTerawihPair = items.value.some(i => i.id === 'terawih8')
+        && items.value.some(i => i.id === 'terawih20');
+      return hasTerawihPair ? items.value.length - 1 : items.value.length;
+    });
 
-    const activeCompleted = computed(
-      () => items.value.filter((item) => activeData.value[item.id]).length,
-    );
+    const activeCompleted = computed(() => {
+      let count = 0;
+      let terawihCounted = false;
+      for (const item of items.value) {
+        if (item.id === 'terawih8' || item.id === 'terawih20') {
+          if (!terawihCounted) {
+            terawihCounted = true;
+            if (activeData.value.terawih8 || activeData.value.terawih20) count++;
+          }
+        } else if (activeData.value[item.id]) {
+          count++;
+        }
+      }
+      return count;
+    });
 
     const progressPercent = computed(() =>
       totalItems.value > 0
@@ -266,8 +294,8 @@ createApp({
 
     const isViewingToday = computed(() => activeDate.value === todayKey.value);
     const isAtFirstDay = computed(() => {
-      // Don't allow going before 1 Ramadan 1447 = 1 Mar 2026
-      return activeDate.value <= '2026-03-01';
+      // Don't allow going before 1 Ramadan 1447 = 2 Mar 2026 (Malaysia)
+      return activeDate.value <= '2026-03-02';
     });
 
     const hijriDate = computed(() => getHijriDate(activeDate.value));

@@ -62,12 +62,6 @@
             >
               📲 Install App
             </button>
-            <button
-              @click="showDonateModal = true"
-              class="inline-flex items-center gap-1.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-3 py-1.5 transition"
-            >
-              💚 Infaq Ramadhan
-            </button>
           </div>
         </header>
 
@@ -119,7 +113,7 @@
                 type="date"
                 v-model="activeDate"
                 :max="todayKey"
-                min="2026-03-01"
+                min="2026-03-02"
                 class="sr-only"
               />
             </div>
@@ -226,6 +220,16 @@
                   class="flex-1 text-sm font-medium cursor-pointer select-none"
                   :class="activeData[z.id] ? 'line-through text-slate-400' : 'text-white'"
                 >{{ z.title }}</span>
+                <!-- counter for ×100 zikir -->
+                <div v-if="z.target" class="flex items-center gap-1 flex-shrink-0" @click.stop>
+                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
+                  <span
+                    class="text-xs font-mono w-8 text-center font-bold"
+                    :class="getQty(activeData, z.id) >= z.target ? 'text-amber-400' : 'text-slate-300'"
+                  >{{ getQty(activeData, z.id) }}</span>
+                  <button @click="setActiveQty(z.id, getQty(activeData, z.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
+                  <span class="text-xs text-slate-500">/{{ z.target }}</span>
+                </div>
                 <button @click="toggleZikir(z.id)" class="flex-shrink-0 text-slate-400 hover:text-amber-400 px-1 transition">
                   <span class="chevron text-xs" :class="{ open: expandedZikir[z.id] }">&#9660;</span>
                 </button>
@@ -251,52 +255,39 @@
       <!-- Infaq / Donate Modal -->
       <div
         v-if="showDonateModal"
-        class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
         @click.self="showDonateModal = false"
       >
-        <div class="bg-slate-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-emerald-400">🕌 Kempen Infaq Ramadhan</h3>
-            <button @click="showDonateModal = false" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition text-lg leading-none">&times;</button>
-          </div>
-          <p class="text-slate-300 text-xs mb-3 text-center">Surau Al-Biruni, Residensi Zamrud A &amp; B</p>
-
-          <!-- Poster / QR image -->
-          <div class="rounded-2xl overflow-hidden mb-4 bg-slate-700/40">
+        <div class="bg-slate-900 w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl">
+          <!-- Full poster image -->
+          <div class="bg-slate-800">
             <img
               src="infaq-poster.jpg"
-              alt="Kempen Infaq Ramadhan QR"
-              class="w-full object-contain max-h-80"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+              alt="Kempen Infaq Ramadhan"
+              class="w-full object-contain"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
             />
-            <!-- Fallback when image not found -->
-            <div class="hidden p-6 text-center">
-              <div class="text-5xl mb-3">📲</div>
-              <p class="text-slate-300 text-sm">DuitNow QR — Surau Al-Biruni</p>
+            <!-- Fallback -->
+            <div class="hidden flex-col items-center justify-center p-10 text-center">
+              <div class="text-6xl mb-4">🕌</div>
+              <p class="text-white font-bold text-lg mb-1">Kempen Infaq Ramadhan</p>
+              <p class="text-slate-400 text-sm mb-2">Surau Al-Biruni · Residensi Zamrud A &amp; B</p>
+              <p class="text-emerald-400 font-bold text-xl">RM 10,000</p>
+              <p class="text-slate-500 text-xs mt-3">Maybank Islamic · Surau Al-Biruni</p>
             </div>
           </div>
-
-          <!-- Bank details -->
-          <div class="bg-slate-700/50 rounded-2xl p-4 space-y-2 mb-4">
-            <div class="flex justify-between text-sm">
-              <span class="text-slate-400">Bank</span>
-              <span class="text-white font-medium">Maybank Islamic Berhad</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-slate-400">Nama Akaun</span>
-              <span class="text-white font-medium">Surau Al-Biruni</span>
-            </div>
-            <div class="flex justify-between text-sm border-t border-slate-600 pt-2 mt-2">
-              <span class="text-slate-400">Sasaran</span>
-              <span class="text-emerald-400 font-bold">RM 10,000</span>
-            </div>
+          <!-- Buttons -->
+          <div class="flex gap-3 p-4">
+            <a
+              href="infaq-poster.jpg"
+              download="Infaq-Ramadhan-Surau-AlBiruni.jpg"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl text-center text-sm transition"
+            >⬇️ Download</a>
+            <button
+              @click="showDonateModal = false"
+              class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 rounded-2xl text-sm transition"
+            >Tutup</button>
           </div>
-
-          <p class="text-slate-500 text-xs text-center mb-3">Sumbangan untuk terawih, iftar/moreh &amp; keperluan surau</p>
-
-          <button @click="showDonateModal = false" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2.5 rounded-2xl transition text-sm">
-            Tutup
-          </button>
         </div>
       </div>
 
