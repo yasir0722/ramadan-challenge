@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ramadhan Tracker" />
+    <meta name="description" content="Track your nightly Ramadhan worship activities" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <title>Ramadhan Tracker</title>
+    <!-- Tailwind CSS (pre-built) -->
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Smooth checkbox transition */
+      .check-ring {
+        transition: background-color 0.2s, border-color 0.2s;
+      }
+      /* Custom date input styling */
+      input[type='date']::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body class="bg-slate-900 text-white min-h-screen">
+    <div id="app" class="max-w-md mx-auto px-4 py-6 pb-12">
+
+      <!-- ── Loading State ─────────────────────────────── -->
+      <div v-if="isLoading" class="flex items-center justify-center h-64">
+        <p class="text-slate-400 text-lg animate-pulse">Loading…</p>
+      </div>
+
+      <!-- ── App Content ───────────────────────────────── -->
+      <template v-else>
+
+        <!-- Header -->
+        <header class="text-center mb-6">
+          <h1 class="text-3xl font-bold text-amber-400 tracking-wide">🌙 Ramadhan Tracker</h1>
+          <p class="text-slate-400 text-sm mt-1">Track your nightly worship activities</p>
+        </header>
+
+        <!-- Streak Card -->
+        <div class="bg-slate-800 rounded-2xl p-4 mb-4 text-center shadow-lg">
+          <p class="text-2xl font-bold text-orange-400">
+            🔥 Streak: {{ streak }} {{ streak === 1 ? 'day' : 'days' }}
+          </p>
+          <p class="text-slate-400 text-xs mt-1">Consecutive days with at least one activity</p>
+        </div>
+
+        <!-- Today Card -->
+        <div class="bg-slate-800 rounded-2xl p-4 mb-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold text-amber-400 text-sm uppercase tracking-wider">Today</h2>
+            <span class="text-slate-400 text-sm">{{ formatDate(todayKey) }}</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="mb-4">
+            <div class="flex justify-between text-sm text-slate-400 mb-2">
+              <span>Progress</span>
+              <span class="font-semibold text-white">{{ todayCompleted }} / {{ totalItems }} completed</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div
+                class="bg-amber-400 h-3 rounded-full transition-all duration-500"
+                :style="{ width: progressPercent + '%' }"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Checklist items -->
+          <ul class="space-y-2">
+            <li
+              v-for="item in items"
+              :key="item.id"
+              @click="toggleTodayItem(item.id)"
+              class="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-700 active:bg-slate-600 transition select-none"
+              :class="{ 'opacity-60': todayData[item.id] }"
+            >
+              <div
+                class="check-ring w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                :class="todayData[item.id]
+                  ? 'bg-amber-400 border-amber-400'
+                  : 'border-slate-500'"
+              >
+                <span v-if="todayData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
+              </div>
+              <span
+                class="text-base"
+                :class="todayData[item.id] ? 'line-through text-slate-400' : 'text-white'"
+              >{{ item.name }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Share Button -->
+        <button
+          @click="share"
+          class="w-full bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-900 font-bold py-3 rounded-2xl mb-4 transition shadow-lg text-base"
+        >
+          {{ shareStatus || '📤 Share Today\'s Result' }}
+        </button>
+
+        <!-- History Card -->
+        <div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
+          <h2 class="font-semibold text-amber-400 text-sm uppercase tracking-wider mb-3">
+            📅 History
+          </h2>
+
+          <!-- Date Picker -->
+          <input
+            type="date"
+            v-model="selectedDate"
+            :max="todayKey"
+            class="w-full bg-slate-700 text-white rounded-xl px-4 py-2 mb-4 border border-slate-600 focus:outline-none focus:border-amber-400 transition"
+          />
+
+          <!-- Past date checklist -->
+          <div v-if="!isViewingToday">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-slate-300 text-sm">{{ formatDate(selectedDate) }}</p>
+              <span class="text-amber-400 text-sm font-semibold">
+                {{ selectedCompleted }} / {{ totalItems }}
+              </span>
+            </div>
+            <ul class="space-y-2">
+              <li
+                v-for="item in items"
+                :key="item.id"
+                @click="toggleSelectedItem(item.id)"
+                class="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-700 active:bg-slate-600 transition select-none"
+                :class="{ 'opacity-60': selectedData[item.id] }"
+              >
+                <div
+                  class="check-ring w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                  :class="selectedData[item.id]
+                    ? 'bg-amber-400 border-amber-400'
+                    : 'border-slate-500'"
+                >
+                  <span v-if="selectedData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
+                </div>
+                <span
+                  class="text-base"
+                  :class="selectedData[item.id] ? 'line-through text-slate-400' : 'text-white'"
+                >{{ item.name }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <p v-else class="text-slate-400 text-sm text-center py-2">
+            Select a previous date above to view or edit past entries.
+          </p>
+        </div>
+
+      </template>
+    </div>
+
+    <!-- Vue 3 (includes template compiler) -->
+    <script type="module" src="app.js"></script>
+
+    <!-- Service Worker registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./service-worker.js')
+            .catch((err) => console.warn('Service worker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
