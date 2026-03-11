@@ -1,13 +1,13 @@
-id,name,type
-sahur,Sahur,general
-subuh,Solat Subuh,general
-quran,Tilawah Al-Quran,general
-dhuha,Solat Dhuha,general
-sedekah,Sedekah,general
-terawih8,Terawih 8 Rakaat,night
-terawih20,Terawih 20 Rakaat,night
-witir,Witir,night
-3qul,3 Qul,night
-tahajud,Qiam Tahajud,night
-hajat,Qiam Hajat,night
-taubat,Qiam Taubat,night
+id,name,type,unit
+sahur,Sahur,general,
+subuh,Solat Subuh,general,
+quran,Tilawah Al-Quran,general,pages
+dhuha,Solat Dhuha,general,
+sedekah,Sedekah,general,RM
+terawih8,Terawih 8 Rakaat,night,
+terawih20,Terawih 20 Rakaat,night,
+witir,Witir,night,
+3qul,3 Qul,night,
+tahajud,Qiam Tahajud,night,
+hajat,Qiam Hajat,night,
+taubat,Qiam Taubat,night,

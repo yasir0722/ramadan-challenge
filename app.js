@@ -42,29 +42,54 @@ function parseCSV(text) {
     .filter((item) => item.id && item.name);
 }
 
-/**
- * Formats a date key to a Hijri (Islamic) date string using the
- * Umm al-Qura calendar, anchored to Kuala Lumpur timezone.
- * @param {string} dateKey - YYYY-MM-DD
- * @returns {string}
- */
+// Ramadan 1447 AH starts 1 March 2026 (Malaysia official)
+const RAMADAN_1447_START = new Date(2026, 2, 1);
+
 function getHijriDate(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
   const date = new Date(y, m - 1, d);
-  try {
-    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'Asia/Kuala_Lumpur',
-    });
-    const parts = fmt.formatToParts(date);
-    const get = (type) => parts.find((p) => p.type === type)?.value ?? '';
-    return `${get('day')} ${get('month')} ${get('year')} AH`;
-  } catch {
-    return '';
-  }
+  const diff = Math.round((date - RAMADAN_1447_START) / 86400000);
+  if (diff >= 0 && diff < 30) return `${diff + 1} Ramadan 1447 AH`;
+  return '';
 }
+
+const ZIKIR_LIST = [
+  {
+    id: 'niat_puasa',
+    title: 'Niat Puasa Ramadhan',
+    arabic: 'نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلَّهِ تَعَالَى',
+    transliteration: "Nawaitu sauma ghadin 'an ada'i fardhi shahri Ramadhana hadzihis sanati lillahi ta'ala",
+    meaning: "Aku niat berpuasa esok hari untuk menunaikan fardhu Ramadhan tahun ini kerana Allah Ta'ala.",
+  },
+  {
+    id: 'buka_puasa',
+    title: 'Doa Berbuka Puasa',
+    arabic: 'اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ',
+    transliteration: "Allahumma inni laka sumtu wa bika aamantu wa 'ala rizqika aftartu",
+    meaning: 'Ya Allah, untuk-Mu aku berpuasa, kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka.',
+  },
+  {
+    id: 'lailatul_qadar',
+    title: 'Doa Lailatul Qadar',
+    arabic: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
+    transliteration: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni",
+    meaning: 'Ya Allah, sesungguhnya Engkau Maha Pemaaf, Engkau menyukai kemaafan, maka maafkanlah aku.',
+  },
+  {
+    id: 'sayyidul_istighfar',
+    title: 'Sayyidul Istighfar',
+    arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
+    transliteration: "Allahumma anta rabbi la ilaha illa anta khalaqtani wa ana 'abduka wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abuu laka bini'matika 'alayya wa abuu laka bidhanbi faghfir li, fa innahu la yaghfirudh-dhunuba illa anta",
+    meaning: "Ya Allah, Engkau Tuhanku, tiada tuhan selain Engkau. Engkau menciptakanku dan aku hamba-Mu. Aku berada di atas perjanjian-Mu semampu aku. Aku berlindung dari kejahatan perbuatanku. Aku mengakui nikmat-Mu dan mengakui dosaku. Maka ampunilah aku, tiada yang mengampuni dosa kecuali Engkau.",
+  },
+  {
+    id: 'tasbih',
+    title: 'Zikir Pagi & Petang',
+    arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+    transliteration: 'Subhanallahi wa bihamdih (100×)',
+    meaning: 'Maha Suci Allah dan segala puji bagi-Nya. Dibaca 100 kali pagi dan petang.',
+  },
+];
 
 createApp({
   setup() {
@@ -76,6 +101,14 @@ createApp({
     const streak = ref(0);
     const shareStatus = ref('');
     const isLoading = ref(true);
+    const sectionExpanded = ref({ general: true, night: true, zikir: false });
+    const expandedZikir = ref({});
+    const deferredInstall = ref(null);
+    const showInstallModal = ref(false);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || !!window.navigator.standalone;
 
     /* ── Data loading ────────────────────────────────────────────── */
 
@@ -138,6 +171,56 @@ createApp({
       refreshStreak();
     }
 
+    /* ── Section & Zikir expand ──────────────────────────────────── */
+
+    function toggleSection(name) {
+      sectionExpanded.value = { ...sectionExpanded.value, [name]: !sectionExpanded.value[name] };
+    }
+
+    function toggleZikir(id) {
+      expandedZikir.value = { ...expandedZikir.value, [id]: !expandedZikir.value[id] };
+    }
+
+    /* ── Quantity ────────────────────────────────────────────────── */
+
+    function getQty(data, id) {
+      return data[id + '_qty'] || 0;
+    }
+
+    function setTodayQty(id, val) {
+      const qty = Math.max(0, parseInt(val) || 0);
+      const updated = { ...todayData.value, [id + '_qty']: qty };
+      if (qty > 0) updated[id] = true;
+      todayData.value = updated;
+      setDateData(todayKey.value, updated);
+      if (selectedDate.value === todayKey.value) selectedData.value = { ...updated };
+      refreshStreak();
+    }
+
+    function setSelectedQty(id, val) {
+      const qty = Math.max(0, parseInt(val) || 0);
+      const updated = { ...selectedData.value, [id + '_qty']: qty };
+      if (qty > 0) updated[id] = true;
+      selectedData.value = updated;
+      setDateData(selectedDate.value, updated);
+      if (selectedDate.value === todayKey.value) todayData.value = { ...updated };
+      refreshStreak();
+    }
+
+    /* ── PWA Install ─────────────────────────────────────────────── */
+
+    function installPWA() {
+      if (deferredInstall.value) {
+        deferredInstall.value.prompt();
+        deferredInstall.value.userChoice.then(() => {
+          deferredInstall.value = null;
+          showInstallModal.value = false;
+        });
+      } else {
+        showInstallModal.value = false;
+      }
+    }
+
     /* ── Computed ────────────────────────────────────────────────── */
 
     const totalItems = computed(() => items.value.length);
@@ -181,7 +264,13 @@ createApp({
     async function share() {
       const completedNames = items.value
         .filter((item) => todayData.value[item.id])
-        .map((item) => `${item.name} ✓`);
+        .map((item) => {
+          if (item.unit) {
+            const qty = getQty(todayData.value, item.id);
+            return qty > 0 ? `${item.name}: ${qty} ${item.unit} ✓` : `${item.name} ✓`;
+          }
+          return `${item.name} ✓`;
+        });
 
       const text = [
         '🌙 Ramadhan Tracker',
@@ -229,10 +318,11 @@ createApp({
       loadSelectedData();
       refreshStreak();
       isLoading.value = false;
-      // Poll every minute for midnight date rollover.
-      // The interval is intentionally not cleared — this single-page app
-      // is never unmounted in normal use.
       setInterval(checkDateReset, 60_000);
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstall.value = e;
+      });
     });
 
     return {
@@ -252,10 +342,23 @@ createApp({
       hijriDate,
       generalItems,
       nightItems,
+      sectionExpanded,
+      expandedZikir,
+      zikirList: ZIKIR_LIST,
+      deferredInstall,
+      showInstallModal,
+      isIOS,
+      isStandalone,
       formatDate,
+      toggleSection,
+      toggleZikir,
       toggleTodayItem,
       toggleSelectedItem,
+      setTodayQty,
+      setSelectedQty,
+      getQty,
       share,
+      installPWA,
     };
   },
 }).mount('#app');
