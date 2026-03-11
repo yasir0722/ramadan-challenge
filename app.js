@@ -58,7 +58,7 @@ const ZIKIR_LIST = [
     id: 'niat_puasa',
     title: 'Niat Puasa Ramadhan',
     arabic: 'نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلَّهِ تَعَالَى',
-    meaning: "Аку ниат берпуаса есок хари унтук менунаикан фардху Рамадхан тахун ини керана Аллаh Та'ала.",
+    meaning: "Aku niat berpuasa esok hari untuk menunaikan fardhu Ramadhan tahun ini kerana Allah Ta'ala.",
   },
   {
     id: 'buka_puasa',
