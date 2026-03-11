@@ -42,6 +42,30 @@ function parseCSV(text) {
     .filter((item) => item.id && item.name);
 }
 
+/**
+ * Formats a date key to a Hijri (Islamic) date string using the
+ * Umm al-Qura calendar, anchored to Kuala Lumpur timezone.
+ * @param {string} dateKey - YYYY-MM-DD
+ * @returns {string}
+ */
+function getHijriDate(dateKey) {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  try {
+    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'Asia/Kuala_Lumpur',
+    });
+    const parts = fmt.formatToParts(date);
+    const get = (type) => parts.find((p) => p.type === type)?.value ?? '';
+    return `${get('day')} ${get('month')} ${get('year')} AH`;
+  } catch {
+    return '';
+  }
+}
+
 createApp({
   setup() {
     const items = ref([]);
@@ -134,6 +158,10 @@ createApp({
 
     const isViewingToday = computed(() => selectedDate.value === todayKey.value);
 
+    const hijriDate = computed(() => getHijriDate(todayKey.value));
+    const generalItems = computed(() => items.value.filter((item) => item.type === 'general'));
+    const nightItems = computed(() => items.value.filter((item) => item.type === 'night'));
+
     /* ── Helpers ─────────────────────────────────────────────────── */
 
     function formatDate(dateKey) {
@@ -157,12 +185,15 @@ createApp({
 
       const text = [
         '🌙 Ramadhan Tracker',
+        hijriDate.value ? `📅 ${hijriDate.value}` : '',
         '',
         `Today: ${todayCompleted.value} / ${totalItems.value} completed`,
         `🔥 Streak: ${streak.value} days`,
         '',
         ...completedNames,
-      ].join('\n');
+        '',
+        'Track yours 👉 https://yasir0722.github.io/ramadan-challenge/',
+      ].filter(Boolean).join('\n');
 
       try {
         if (navigator.share) {
@@ -218,6 +249,9 @@ createApp({
       progressPercent,
       selectedCompleted,
       isViewingToday,
+      hijriDate,
+      generalItems,
+      nightItems,
       formatDate,
       toggleTodayItem,
       toggleSelectedItem,

@@ -5,7 +5,7 @@
  * All core assets are pre-cached on install.
  */
 
-const CACHE_NAME = 'ramadhan-tracker-v1';
+const CACHE_NAME = 'ramadhan-tracker-v2';
 
 const PRECACHE_ASSETS = [
   './',
