@@ -146,16 +146,25 @@
           </button>
           <div v-if="sectionExpanded.zikir" class="mt-3 space-y-2">
             <div v-for="z in zikirList" :key="z.id" class="rounded-xl overflow-hidden border border-slate-700">
-              <button
-                @click="toggleZikir(z.id)"
-                class="w-full flex items-center justify-between px-4 py-3 text-left bg-slate-700/50 hover:bg-slate-700 transition"
-              >
-                <span class="text-sm font-medium text-white">{{ z.title }}</span>
-                <span class="chevron text-slate-400 text-xs flex-shrink-0 ml-2" :class="{ open: expandedZikir[z.id] }">&#9660;</span>
-              </button>
-              <div v-if="expandedZikir[z.id]" class="px-4 py-3 space-y-3 bg-slate-800/80">
-                <p class="text-right text-xl leading-loose text-amber-200 font-medium" dir="rtl">{{ z.arabic }}</p>
-                <p class="text-slate-300 text-sm italic">{{ z.transliteration }}</p>
+              <div class="flex items-center gap-3 px-4 py-3 bg-slate-700/50">
+                <div
+                  @click="toggleTodayItem(z.id)"
+                  class="check-ring w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center cursor-pointer"
+                  :class="todayData[z.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
+                >
+                  <span v-if="todayData[z.id]" class="text-slate-900 text-xs font-black">✓</span>
+                </div>
+                <span
+                  @click="toggleTodayItem(z.id)"
+                  class="flex-1 text-sm font-medium cursor-pointer select-none"
+                  :class="todayData[z.id] ? 'line-through text-slate-400' : 'text-white'"
+                >{{ z.title }}</span>
+                <button @click="toggleZikir(z.id)" class="flex-shrink-0 text-slate-400 hover:text-amber-400 px-1 transition">
+                  <span class="chevron text-xs" :class="{ open: expandedZikir[z.id] }">&#9660;</span>
+                </button>
+              </div>
+              <div v-if="expandedZikir[z.id]" class="px-4 py-3 space-y-2 bg-slate-800/80">
+                <p class="text-right text-2xl leading-loose text-amber-200 font-medium" dir="rtl">{{ z.arabic }}</p>
                 <p class="text-slate-400 text-sm border-t border-slate-700 pt-2">{{ z.meaning }}</p>
               </div>
             </div>

@@ -58,36 +58,73 @@ const ZIKIR_LIST = [
     id: 'niat_puasa',
     title: 'Niat Puasa Ramadhan',
     arabic: 'نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلَّهِ تَعَالَى',
-    transliteration: "Nawaitu sauma ghadin 'an ada'i fardhi shahri Ramadhana hadzihis sanati lillahi ta'ala",
-    meaning: "Aku niat berpuasa esok hari untuk menunaikan fardhu Ramadhan tahun ini kerana Allah Ta'ala.",
+    meaning: "Аку ниат берпуаса есок хари унтук менунаикан фардху Рамадхан тахун ини керана Аллаh Та'ала.",
   },
   {
     id: 'buka_puasa',
     title: 'Doa Berbuka Puasa',
-    arabic: 'اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ',
-    transliteration: "Allahumma inni laka sumtu wa bika aamantu wa 'ala rizqika aftartu",
-    meaning: 'Ya Allah, untuk-Mu aku berpuasa, kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka.',
+    arabic: 'اللهم لك صمت وعلى رزقك أفطرت',
+    meaning: 'Ya Allah, untuk-Mu aku berpuasa dan dengan rezeki-Mu aku berbuka.',
   },
   {
     id: 'lailatul_qadar',
     title: 'Doa Lailatul Qadar',
     arabic: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
-    transliteration: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni",
     meaning: 'Ya Allah, sesungguhnya Engkau Maha Pemaaf, Engkau menyukai kemaafan, maka maafkanlah aku.',
   },
   {
     id: 'sayyidul_istighfar',
     title: 'Sayyidul Istighfar',
     arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
-    transliteration: "Allahumma anta rabbi la ilaha illa anta khalaqtani wa ana 'abduka wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abuu laka bini'matika 'alayya wa abuu laka bidhanbi faghfir li, fa innahu la yaghfirudh-dhunuba illa anta",
-    meaning: "Ya Allah, Engkau Tuhanku, tiada tuhan selain Engkau. Engkau menciptakanku dan aku hamba-Mu. Aku berada di atas perjanjian-Mu semampu aku. Aku berlindung dari kejahatan perbuatanku. Aku mengakui nikmat-Mu dan mengakui dosaku. Maka ampunilah aku, tiada yang mengampuni dosa kecuali Engkau.",
+    meaning: "Ya Allah Engkau Tuhanku, tiada tuhan selain Engkau. Engkau menciptakanku dan aku hamba-Mu. Aku berada di atas perjanjian-Mu semampu aku. Aku berlindung dari kejahatan perbuatanku. Aku mengakui nikmat-Mu dan mengakui dosaku. Maka ampunilah aku, tiada yang mengampuni dosa kecuali Engkau.",
   },
   {
-    id: 'tasbih',
-    title: 'Zikir Pagi & Petang',
-    arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-    transliteration: 'Subhanallahi wa bihamdih (100×)',
-    meaning: 'Maha Suci Allah dan segala puji bagi-Nya. Dibaca 100 kali pagi dan petang.',
+    id: 'subhanallah',
+    title: 'Subhanallah × 100',
+    arabic: 'سُبْحَانَ اللهِ',
+    meaning: 'Maha Suci Allah. Dibaca 100 kali.',
+  },
+  {
+    id: 'alhamdulillah',
+    title: 'Alhamdulillah × 100',
+    arabic: 'الْحَمْدُ لِلهِ',
+    meaning: 'Segala puji bagi Allah. Dibaca 100 kali.',
+  },
+  {
+    id: 'allahuakbar',
+    title: 'Allahu Akbar × 100',
+    arabic: 'اللهُ أَكْبَرُ',
+    meaning: 'Allah Maha Besar. Dibaca 100 kali.',
+  },
+  {
+    id: 'astaghfirullah',
+    title: 'Astaghfirullah × 100',
+    arabic: 'أَسْتَغْفِرُ اللهَ',
+    meaning: 'Aku memohon ampun kepada Allah. Dibaca 100 kali.',
+  },
+  {
+    id: 'tasbih_azim',
+    title: 'Tasbih Agung',
+    arabic: 'سُبْحَانَ اللهِ وَبِحَمْدِهِ سُبْحَانَ اللهِ الْعَظِيمِ',
+    meaning: 'Maha Suci Allah dan segala puji bagi-Nya, Maha Suci Allah Yang Maha Agung.',
+  },
+  {
+    id: 'selawat',
+    title: 'Selawat × 100',
+    arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',
+    meaning: 'Ya Allah, cucurkanlah rahmat ke atas Nabi Muhammad. Dibaca 100 kali.',
+  },
+  {
+    id: 'rabbana_atina',
+    title: 'Rabbana Atina',
+    arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
+    meaning: 'Ya Tuhan kami, berikanlah kami kebaikan di dunia dan kebaikan di akhirat, dan peliharalah kami dari azab neraka.',
+  },
+  {
+    id: 'doa_yunus',
+    title: 'Doa Nabi Yunus',
+    arabic: 'لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ',
+    meaning: 'Tiada tuhan melainkan Engkau, Maha Suci Engkau, sesungguhnya aku adalah termasuk orang-orang yang zalim.',
   },
 ];
 
@@ -152,22 +189,24 @@ createApp({
     /* ── Checklist toggles ───────────────────────────────────────── */
 
     function toggleTodayItem(id) {
-      todayData.value = { ...todayData.value, [id]: !todayData.value[id] };
-      setDateData(todayKey.value, todayData.value);
-      // Keep selected in sync when viewing today
-      if (selectedDate.value === todayKey.value) {
-        selectedData.value = { ...todayData.value };
-      }
+      const newVal = !todayData.value[id];
+      const updated = { ...todayData.value, [id]: newVal };
+      if (id === 'terawih8' && newVal) updated.terawih20 = false;
+      if (id === 'terawih20' && newVal) updated.terawih8 = false;
+      todayData.value = updated;
+      setDateData(todayKey.value, updated);
+      if (selectedDate.value === todayKey.value) selectedData.value = { ...updated };
       refreshStreak();
     }
 
     function toggleSelectedItem(id) {
-      selectedData.value = { ...selectedData.value, [id]: !selectedData.value[id] };
-      setDateData(selectedDate.value, selectedData.value);
-      // Keep today in sync when selected date is today
-      if (selectedDate.value === todayKey.value) {
-        todayData.value = { ...selectedData.value };
-      }
+      const newVal = !selectedData.value[id];
+      const updated = { ...selectedData.value, [id]: newVal };
+      if (id === 'terawih8' && newVal) updated.terawih20 = false;
+      if (id === 'terawih20' && newVal) updated.terawih8 = false;
+      selectedData.value = updated;
+      setDateData(selectedDate.value, updated);
+      if (selectedDate.value === todayKey.value) todayData.value = { ...updated };
       refreshStreak();
     }
 
