@@ -54,21 +54,45 @@
           <p class="text-slate-400 text-xs mt-1">Consecutive days with at least one activity</p>
         </div>
 
-        <!-- Today Card -->
+        <!-- Unified Checklist Card -->
         <div class="bg-slate-800 rounded-2xl p-4 mb-4 shadow-lg">
+
+          <!-- Date navigation -->
           <div class="flex items-center justify-between mb-3">
-            <h2 class="font-semibold text-amber-400 text-sm uppercase tracking-wider">Today</h2>
-            <div class="text-right">
-              <p class="text-slate-400 text-sm">{{ formatDate(todayKey) }}</p>
-              <p v-if="hijriDate" class="text-amber-300 text-xs font-medium">{{ hijriDate }}</p>
+            <button
+              @click="prevDay"
+              :disabled="isAtFirstDay"
+              class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-700 active:bg-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed text-slate-300"
+            >&#8592;</button>
+
+            <div class="text-center flex-1 mx-2 cursor-pointer" @click="$refs.datePicker.showPicker ? $refs.datePicker.showPicker() : $refs.datePicker.click()">
+              <span class="text-sm text-slate-300 font-medium">
+                <span v-if="isViewingToday" class="text-amber-400 font-semibold">Today</span>
+                <span v-else>{{ formatDate(activeDate) }}</span>
+              </span>
+              <p v-if="hijriDate" class="text-amber-300 text-xs">{{ hijriDate }}</p>
+              <input
+                ref="datePicker"
+                type="date"
+                v-model="activeDate"
+                :max="todayKey"
+                min="2026-03-01"
+                class="sr-only"
+              />
             </div>
+
+            <button
+              @click="nextDay"
+              :disabled="isViewingToday"
+              class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-700 active:bg-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed text-slate-300"
+            >&#8594;</button>
           </div>
 
           <!-- Progress bar -->
           <div class="mb-4">
             <div class="flex justify-between text-sm text-slate-400 mb-2">
               <span>Progress</span>
-              <span class="font-semibold text-white">{{ todayCompleted }} / {{ totalItems }} completed</span>
+              <span class="font-semibold text-white">{{ activeCompleted }} / {{ totalItems }} completed</span>
             </div>
             <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
               <div
@@ -78,7 +102,7 @@
             </div>
           </div>
 
-          <!-- Checklist items: Daily / General -->
+          <!-- Daily section -->
           <div class="mb-3">
             <button @click="toggleSection('general')" class="w-full flex items-center justify-between py-2 text-left">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Daily</span>
@@ -91,28 +115,28 @@
                 class="flex items-center gap-3 p-3 rounded-xl bg-slate-700/40"
               >
                 <div
-                  @click="toggleTodayItem(item.id)"
+                  @click="toggleActiveItem(item.id)"
                   class="check-ring w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center cursor-pointer"
-                  :class="todayData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
+                  :class="activeData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
                 >
-                  <span v-if="todayData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
+                  <span v-if="activeData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
                 </div>
                 <span
-                  @click="toggleTodayItem(item.id)"
+                  @click="toggleActiveItem(item.id)"
                   class="flex-1 text-base cursor-pointer select-none"
-                  :class="todayData[item.id] ? 'line-through text-slate-400' : 'text-white'"
+                  :class="activeData[item.id] ? 'line-through text-slate-400' : 'text-white'"
                 >{{ item.name }}</span>
                 <div v-if="item.unit" class="flex items-center gap-1">
-                  <button @click="setTodayQty(item.id, getQty(todayData, item.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
-                  <span class="text-sm text-amber-300 w-7 text-center">{{ getQty(todayData, item.id) }}</span>
-                  <button @click="setTodayQty(item.id, getQty(todayData, item.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
+                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
+                  <span class="text-sm text-amber-300 w-7 text-center">{{ getQty(activeData, item.id) }}</span>
+                  <button @click="setActiveQty(item.id, getQty(activeData, item.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
                   <span class="text-xs text-slate-500 ml-1">{{ item.unit }}</span>
                 </div>
               </li>
             </ul>
           </div>
 
-          <!-- Checklist items: Night Prayers -->
+          <!-- Night Prayers section -->
           <div>
             <button @click="toggleSection('night')" class="w-full flex items-center justify-between py-2 text-left">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Night Prayers</span>
@@ -122,17 +146,17 @@
               <li
                 v-for="item in nightItems"
                 :key="item.id"
-                @click="toggleTodayItem(item.id)"
+                @click="toggleActiveItem(item.id)"
                 class="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-700 active:bg-slate-600 transition select-none"
-                :class="{ 'opacity-60': todayData[item.id] }"
+                :class="{ 'opacity-60': activeData[item.id] }"
               >
                 <div
                   class="check-ring w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                  :class="todayData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
+                  :class="activeData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
                 >
-                  <span v-if="todayData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
+                  <span v-if="activeData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
                 </div>
-                <span class="text-base" :class="todayData[item.id] ? 'line-through text-slate-400' : 'text-white'">{{ item.name }}</span>
+                <span class="text-base" :class="activeData[item.id] ? 'line-through text-slate-400' : 'text-white'">{{ item.name }}</span>
               </li>
             </ul>
           </div>
@@ -148,16 +172,16 @@
             <div v-for="z in zikirList" :key="z.id" class="rounded-xl overflow-hidden border border-slate-700">
               <div class="flex items-center gap-3 px-4 py-3 bg-slate-700/50">
                 <div
-                  @click="toggleTodayItem(z.id)"
+                  @click="toggleActiveItem(z.id)"
                   class="check-ring w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center cursor-pointer"
-                  :class="todayData[z.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
+                  :class="activeData[z.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
                 >
-                  <span v-if="todayData[z.id]" class="text-slate-900 text-xs font-black">✓</span>
+                  <span v-if="activeData[z.id]" class="text-slate-900 text-xs font-black">✓</span>
                 </div>
                 <span
-                  @click="toggleTodayItem(z.id)"
+                  @click="toggleActiveItem(z.id)"
                   class="flex-1 text-sm font-medium cursor-pointer select-none"
-                  :class="todayData[z.id] ? 'line-through text-slate-400' : 'text-white'"
+                  :class="activeData[z.id] ? 'line-through text-slate-400' : 'text-white'"
                 >{{ z.title }}</span>
                 <button @click="toggleZikir(z.id)" class="flex-shrink-0 text-slate-400 hover:text-amber-400 px-1 transition">
                   <span class="chevron text-xs" :class="{ open: expandedZikir[z.id] }">&#9660;</span>
@@ -178,92 +202,6 @@
         >
           {{ shareStatus || '📤 Share Today\'s Result' }}
         </button>
-
-        <!-- History Card -->
-        <div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
-          <h2 class="font-semibold text-amber-400 text-sm uppercase tracking-wider mb-3">
-            📅 History
-          </h2>
-
-          <!-- Date Picker -->
-          <input
-            type="date"
-            v-model="selectedDate"
-            :max="todayKey"
-            class="w-full bg-slate-700 text-white rounded-xl px-4 py-2 mb-4 border border-slate-600 focus:outline-none focus:border-amber-400 transition"
-          />
-
-          <!-- Past date checklist -->
-          <div v-if="!isViewingToday">
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-slate-300 text-sm">{{ formatDate(selectedDate) }}</p>
-              <span class="text-amber-400 text-sm font-semibold">
-                {{ selectedCompleted }} / {{ totalItems }}
-              </span>
-            </div>
-            <!-- Daily -->
-            <div class="mb-3">
-              <button @click="toggleSection('general')" class="w-full flex items-center justify-between py-2 text-left">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Daily</span>
-                <span class="chevron text-slate-400 text-xs" :class="{ open: sectionExpanded.general }">&#9660;</span>
-              </button>
-              <ul v-if="sectionExpanded.general" class="space-y-2">
-                <li
-                  v-for="item in generalItems"
-                  :key="item.id"
-                  class="flex items-center gap-3 p-3 rounded-xl bg-slate-700/40"
-                >
-                  <div
-                    @click="toggleSelectedItem(item.id)"
-                    class="check-ring w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center cursor-pointer"
-                    :class="selectedData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
-                  >
-                    <span v-if="selectedData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
-                  </div>
-                  <span
-                    @click="toggleSelectedItem(item.id)"
-                    class="flex-1 text-base cursor-pointer select-none"
-                    :class="selectedData[item.id] ? 'line-through text-slate-400' : 'text-white'"
-                  >{{ item.name }}</span>
-                  <div v-if="item.unit" class="flex items-center gap-1">
-                    <button @click="setSelectedQty(item.id, getQty(selectedData, item.id) - 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">&minus;</button>
-                    <span class="text-sm text-amber-300 w-7 text-center">{{ getQty(selectedData, item.id) }}</span>
-                    <button @click="setSelectedQty(item.id, getQty(selectedData, item.id) + 1)" class="w-6 h-6 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-sm leading-none flex items-center justify-center">+</button>
-                    <span class="text-xs text-slate-500 ml-1">{{ item.unit }}</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <!-- Night Prayers -->
-            <div>
-              <button @click="toggleSection('night')" class="w-full flex items-center justify-between py-2 text-left">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Night Prayers</span>
-                <span class="chevron text-slate-400 text-xs" :class="{ open: sectionExpanded.night }">&#9660;</span>
-              </button>
-              <ul v-if="sectionExpanded.night" class="space-y-2">
-                <li
-                  v-for="item in nightItems"
-                  :key="item.id"
-                  @click="toggleSelectedItem(item.id)"
-                  class="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-700 active:bg-slate-600 transition select-none"
-                  :class="{ 'opacity-60': selectedData[item.id] }"
-                >
-                  <div
-                    class="check-ring w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                    :class="selectedData[item.id] ? 'bg-amber-400 border-amber-400' : 'border-slate-500'"
-                  >
-                    <span v-if="selectedData[item.id]" class="text-slate-900 text-xs font-black">✓</span>
-                  </div>
-                  <span class="text-base" :class="selectedData[item.id] ? 'line-through text-slate-400' : 'text-white'">{{ item.name }}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <p v-else class="text-slate-400 text-sm text-center py-2">
-            Select a previous date above to view or edit past entries.
-          </p>
-        </div>
 
       </template>
 

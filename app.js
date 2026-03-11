@@ -132,9 +132,8 @@ createApp({
   setup() {
     const items = ref([]);
     const todayKey = ref(getTodayKey());
-    const todayData = ref({});
-    const selectedDate = ref(getTodayKey());
-    const selectedData = ref({});
+    const activeDate = ref(getTodayKey()); // single active date — today by default
+    const activeData = ref({});
     const streak = ref(0);
     const shareStatus = ref('');
     const isLoading = ref(true);
@@ -161,12 +160,8 @@ createApp({
       }
     }
 
-    function loadTodayData() {
-      todayData.value = { ...getDateData(todayKey.value) };
-    }
-
-    function loadSelectedData() {
-      selectedData.value = { ...getDateData(selectedDate.value) };
+    function loadActiveData() {
+      activeData.value = { ...getDateData(activeDate.value) };
     }
 
     function refreshStreak() {
@@ -179,34 +174,39 @@ createApp({
       const current = getTodayKey();
       if (current !== todayKey.value) {
         todayKey.value = current;
-        selectedDate.value = current;
-        loadTodayData();
-        loadSelectedData();
+        // If user was viewing today, advance them to new today
+        if (activeDate.value === todayKey.value) activeDate.value = current;
+        loadActiveData();
         refreshStreak();
       }
     }
 
-    /* ── Checklist toggles ───────────────────────────────────────── */
+    /* ── Date navigation ─────────────────────────────────────────── */
 
-    function toggleTodayItem(id) {
-      const newVal = !todayData.value[id];
-      const updated = { ...todayData.value, [id]: newVal };
-      if (id === 'terawih8' && newVal) updated.terawih20 = false;
-      if (id === 'terawih20' && newVal) updated.terawih8 = false;
-      todayData.value = updated;
-      setDateData(todayKey.value, updated);
-      if (selectedDate.value === todayKey.value) selectedData.value = { ...updated };
-      refreshStreak();
+    function prevDay() {
+      const [y, m, d] = activeDate.value.split('-').map(Number);
+      const prev = new Date(y, m - 1, d - 1);
+      const key = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
+      activeDate.value = key;
     }
 
-    function toggleSelectedItem(id) {
-      const newVal = !selectedData.value[id];
-      const updated = { ...selectedData.value, [id]: newVal };
+    function nextDay() {
+      if (activeDate.value >= todayKey.value) return;
+      const [y, m, d] = activeDate.value.split('-').map(Number);
+      const next = new Date(y, m - 1, d + 1);
+      const key = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+      activeDate.value = key;
+    }
+
+    /* ── Checklist toggles ───────────────────────────────────────── */
+
+    function toggleActiveItem(id) {
+      const newVal = !activeData.value[id];
+      const updated = { ...activeData.value, [id]: newVal };
       if (id === 'terawih8' && newVal) updated.terawih20 = false;
       if (id === 'terawih20' && newVal) updated.terawih8 = false;
-      selectedData.value = updated;
-      setDateData(selectedDate.value, updated);
-      if (selectedDate.value === todayKey.value) todayData.value = { ...updated };
+      activeData.value = updated;
+      setDateData(activeDate.value, updated);
       refreshStreak();
     }
 
@@ -226,23 +226,12 @@ createApp({
       return data[id + '_qty'] || 0;
     }
 
-    function setTodayQty(id, val) {
+    function setActiveQty(id, val) {
       const qty = Math.max(0, parseInt(val) || 0);
-      const updated = { ...todayData.value, [id + '_qty']: qty };
+      const updated = { ...activeData.value, [id + '_qty']: qty };
       if (qty > 0) updated[id] = true;
-      todayData.value = updated;
-      setDateData(todayKey.value, updated);
-      if (selectedDate.value === todayKey.value) selectedData.value = { ...updated };
-      refreshStreak();
-    }
-
-    function setSelectedQty(id, val) {
-      const qty = Math.max(0, parseInt(val) || 0);
-      const updated = { ...selectedData.value, [id + '_qty']: qty };
-      if (qty > 0) updated[id] = true;
-      selectedData.value = updated;
-      setDateData(selectedDate.value, updated);
-      if (selectedDate.value === todayKey.value) todayData.value = { ...updated };
+      activeData.value = updated;
+      setDateData(activeDate.value, updated);
       refreshStreak();
     }
 
@@ -264,23 +253,23 @@ createApp({
 
     const totalItems = computed(() => items.value.length);
 
-    const todayCompleted = computed(
-      () => items.value.filter((item) => todayData.value[item.id]).length,
+    const activeCompleted = computed(
+      () => items.value.filter((item) => activeData.value[item.id]).length,
     );
 
     const progressPercent = computed(() =>
       totalItems.value > 0
-        ? Math.round((todayCompleted.value / totalItems.value) * 100)
+        ? Math.round((activeCompleted.value / totalItems.value) * 100)
         : 0,
     );
 
-    const selectedCompleted = computed(
-      () => items.value.filter((item) => selectedData.value[item.id]).length,
-    );
+    const isViewingToday = computed(() => activeDate.value === todayKey.value);
+    const isAtFirstDay = computed(() => {
+      // Don't allow going before 1 Ramadan 1447 = 1 Mar 2026
+      return activeDate.value <= '2026-03-01';
+    });
 
-    const isViewingToday = computed(() => selectedDate.value === todayKey.value);
-
-    const hijriDate = computed(() => getHijriDate(todayKey.value));
+    const hijriDate = computed(() => getHijriDate(activeDate.value));
     const generalItems = computed(() => items.value.filter((item) => item.type === 'general'));
     const nightItems = computed(() => items.value.filter((item) => item.type === 'night'));
 
@@ -302,10 +291,10 @@ createApp({
 
     async function share() {
       const completedNames = items.value
-        .filter((item) => todayData.value[item.id])
+        .filter((item) => activeData.value[item.id])
         .map((item) => {
           if (item.unit) {
-            const qty = getQty(todayData.value, item.id);
+            const qty = getQty(activeData.value, item.id);
             return qty > 0 ? `${item.name}: ${qty} ${item.unit} ✓` : `${item.name} ✓`;
           }
           return `${item.name} ✓`;
@@ -315,7 +304,7 @@ createApp({
         '🌙 Ramadhan Tracker',
         hijriDate.value ? `📅 ${hijriDate.value}` : '',
         '',
-        `Today: ${todayCompleted.value} / ${totalItems.value} completed`,
+        `${isViewingToday.value ? 'Today' : formatDate(activeDate.value)}: ${activeCompleted.value} / ${totalItems.value} completed`,
         `🔥 Streak: ${streak.value} days`,
         '',
         ...completedNames,
@@ -349,12 +338,11 @@ createApp({
 
     /* ── Lifecycle ───────────────────────────────────────────────── */
 
-    watch(selectedDate, loadSelectedData);
+    watch(activeDate, loadActiveData);
 
     onMounted(async () => {
       await loadItems();
-      loadTodayData();
-      loadSelectedData();
+      loadActiveData();
       refreshStreak();
       isLoading.value = false;
       setInterval(checkDateReset, 60_000);
@@ -367,17 +355,16 @@ createApp({
     return {
       items,
       todayKey,
-      todayData,
-      selectedDate,
-      selectedData,
+      activeDate,
+      activeData,
       streak,
       shareStatus,
       isLoading,
       totalItems,
-      todayCompleted,
+      activeCompleted,
       progressPercent,
-      selectedCompleted,
       isViewingToday,
+      isAtFirstDay,
       hijriDate,
       generalItems,
       nightItems,
@@ -391,11 +378,11 @@ createApp({
       formatDate,
       toggleSection,
       toggleZikir,
-      toggleTodayItem,
-      toggleSelectedItem,
-      setTodayQty,
-      setSelectedQty,
+      toggleActiveItem,
+      setActiveQty,
       getQty,
+      prevDay,
+      nextDay,
       share,
       installPWA,
     };
