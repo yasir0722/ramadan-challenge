@@ -141,6 +141,7 @@ createApp({
     const expandedZikir = ref({});
     const deferredInstall = ref(null);
     const showInstallModal = ref(false);
+    const showDonateModal = ref(false);
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
@@ -287,6 +288,18 @@ createApp({
       });
     }
 
+    function formatDateShort(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('en-MY', {
+        day: 'numeric', month: 'short', year: 'numeric',
+      });
+    }
+
+    function formatDateDay(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('en-MY', { weekday: 'long' });
+    }
+
     /* ── Share ───────────────────────────────────────────────────── */
 
     async function share() {
@@ -346,9 +359,12 @@ createApp({
       refreshStreak();
       isLoading.value = false;
       setInterval(checkDateReset, 60_000);
+      // Pick up prompt captured before Vue mounted
+      if (window.__deferredInstall) deferredInstall.value = window.__deferredInstall;
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstall.value = e;
+        window.__deferredInstall = e;
       });
     });
 
@@ -373,9 +389,12 @@ createApp({
       zikirList: ZIKIR_LIST,
       deferredInstall,
       showInstallModal,
+      showDonateModal,
       isIOS,
       isStandalone,
       formatDate,
+      formatDateShort,
+      formatDateDay,
       toggleSection,
       toggleZikir,
       toggleActiveItem,
