@@ -63,7 +63,13 @@ const ZIKIR_LIST = [
   {
     id: 'buka_puasa',
     title: 'Doa Berbuka Puasa',
-    arabic: 'اللهم لك صمت وعلى رزقك أفطرت',
+    arabic: 'اللَّهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ بِرَحْمَتِكَ يَا أَرْحَمَ الرَّاحِمِينَ',
+    meaning: 'Ya Allah, untuk-Mu aku berpuasa dan dengan rezeki-Mu aku berbuka.',
+  },
+  {
+    id: 'buka_puasa_2',
+    title: 'Doa Berbuka Puasa 2',
+    arabic: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
     meaning: 'Ya Allah, untuk-Mu aku berpuasa dan dengan rezeki-Mu aku berbuka.',
   },
   {
