@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background -->
+  <rect width="100" height="100" rx="20" fill="#0f172a"/>
+  <!-- Crescent moon (gold circle clipped by dark offset circle) -->
+  <circle cx="52" cy="50" r="28" fill="#f59e0b"/>
+  <circle cx="65" cy="43" r="22" fill="#0f172a"/>
+  <!-- Stars -->
+  <circle cx="72" cy="30" r="3" fill="#fbbf24"/>
+  <circle cx="80" cy="52" r="2" fill="#fbbf24"/>
+  <circle cx="62" cy="72" r="2.5" fill="#fbbf24"/>
+</svg>

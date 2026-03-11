@@ -1,0 +1,19 @@
+{
+  "name": "Ramadhan Tracker",
+  "short_name": "Ramadhan",
+  "description": "Track your nightly Ramadhan worship activities",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
