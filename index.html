@@ -20,8 +20,17 @@
         window.__deferredInstall = e;
       });
     </script>
-    <!-- Tailwind CSS (pre-built) -->
-    <link rel="stylesheet" href="style.css" />
+    <!-- Tailwind CSS via CDN (no build needed) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['system-ui', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
     <style>
       .check-ring { transition: background-color 0.2s, border-color 0.2s; }
       input[type='date']::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
